@@ -1,20 +1,38 @@
 <div class="container mt-4">
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <!-- Indicateur de chargement -->
+    <div *ngIf="loading" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="error" class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+
+    <!-- Liste des produits -->
+    <div class="row row-cols-1 row-cols-md-3 g-4" *ngIf="!loading && !error">
         <div class="col" *ngFor="let produit of produits">
             <div class="card h-100">
-                <img [src]="produit.imgUrl" class="card-img-top" alt="{{ produit.nom }}">
+                <img [src]="getImageUrl(produit.imageUrl)" class="card-img-top" alt="{{ produit.name }}" style="height: 200px; object-fit: cover;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ produit.nom }}</h5>
+                    <h5 class="card-title">{{ produit.name }}</h5>
                     <p class="card-text">{{ produit.description }}</p>
                 </div>
                 <div class="card-footer">
-                    <strong class="text-primary">Prix : {{ produit.prix | currency:'EUR' }}</strong>
+                    <strong class="text-primary">Prix : {{ produit.price | currency:'EUR' }}</strong>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
                     <button class="btn btn-outline-primary btn-sm">Ajouter au panier</button>
-                    <button class="btn btn-primary btn-sm">Acheter</button>
+                    <button class="btn btn-danger btn-sm" (click)="deleteProduct(produit.id)">Supprimer</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Message si aucun produit -->
+    <div *ngIf="!loading && !error && produits.length === 0" class="alert alert-info">
+        Aucun produit disponible.
     </div>
 </div>

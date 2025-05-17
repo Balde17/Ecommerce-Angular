@@ -1,78 +1,65 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { ProductService } from '../../services/product.service';
+import { Product } from '../../models/product.model';
 
 @Component({
   selector: 'app-produits',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './produits.component.html',
   styleUrl: './produits.component.css'
 })
-export class ProduitsComponent {
-  produits: {
-    nom: string;
-    description: string;
-    prix: number;
-    imgUrl: string;
-  }[];
+export class ProduitsComponent implements OnInit {
+  produits: Product[] = [];
+  loading: boolean = true;
+  error: string | null = null;
 
-  constructor() {
-    this.produits = [
-      {
-        nom: "Casque Bluetooth",
-        description: "Un casque Bluetooth",
-        prix: 200,
-        imgUrl: "assets/images/headphone.webp"
+  // Mapping des noms de produits vers leurs images
+  private imageMap: { [key: string]: string } = {
+    'Casque Bluetooth': 'assets/images/headphone.webp',
+    'IPhone 18 Pro': 'assets/images/iphone.webp',
+    'Termos': 'assets/images/termos.jpg',
+    'Ordi': 'assets/images/ordibrousse.jpg',
+    'Ordinateur': 'assets/images/ordietpomme.jpg'
+  };
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    this.productService.getProducts().subscribe({
+      next: (data) => {
+        this.produits = data;
+        this.loading = false;
       },
-      {
-        nom: "IPhone 18 Pro",
-        description: "Un téléphone",
-        prix: 2000,
-        imgUrl: "assets/images/iphone.webp"
-      },
-      {
-        nom: "Termos",
-        description: "Un termos",
-        prix: 2000,
-        imgUrl: "assets/images/termos.jpg"
-      },
-      {
-        nom: "Ordi",
-        description: "Un ordinateur portable",
-        prix: 2000,
-        imgUrl: "assets/images/ordibrousse.jpg"
-      },
-      {
-        nom: "Ordinateur",
-        description: "Un ordinateur portable",
-        prix: 2000,
-        imgUrl: "assets/images/ordietpomme.jpg"
-      },
-      {
-        nom: "Casque Bluetooth",
-        description: "Un casque Bluetooth",
-        prix: 200,
-        imgUrl: "assets/images/headphone.webp"
-      },
-      {
-        nom: "IPhone 18 Pro",
-        description: "Un téléphone",
-        prix: 2000,
-        imgUrl: "assets/images/iphone.webp"
-      },
-      {
-        nom: "Ordi",
-        description: "Un ordinateur portable",
-        prix: 2000,
-        imgUrl: "assets/images/ordibrousse.jpg"
-      },
-      {
-        nom: "Ordinateur",
-        description: "Un ordinateur portable",
-        prix: 2000,
-        imgUrl: "assets/images/ordietpomme.jpg"
+      error: (error) => {
+        this.error = 'Erreur lors du chargement des produits';
+        this.loading = false;
+        console.error('Erreur:', error);
       }
+    });
+  }
 
-    ]
-    // this.produits = ["PC Asus", "Imprimante Epson", "Tablette Samsung"]
+  deleteProduct(id: number) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+      this.productService.deleteProduct(id).subscribe({
+        next: () => {
+          this.produits = this.produits.filter(p => p.id !== id);
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression:', error);
+        }
+      });
+    }
+  }
+
+  getImageUrl(productName: string): string {
+    return `assets/images/${productName}` || 'assets/images/default-product.jpg';
   }
 }
