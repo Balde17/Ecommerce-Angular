@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
 
@@ -16,16 +17,10 @@ export class ProduitsComponent implements OnInit {
   loading: boolean = true;
   error: string | null = null;
 
-  // Mapping des noms de produits vers leurs images
-  private imageMap: { [key: string]: string } = {
-    'Casque Bluetooth': 'assets/images/headphone.webp',
-    'IPhone 18 Pro': 'assets/images/iphone.webp',
-    'Termos': 'assets/images/termos.jpg',
-    'Ordi': 'assets/images/ordibrousse.jpg',
-    'Ordinateur': 'assets/images/ordietpomme.jpg'
-  };
-
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.loadProducts();
@@ -57,6 +52,10 @@ export class ProduitsComponent implements OnInit {
         }
       });
     }
+  }
+
+  editProduct(product: Product) {
+    this.router.navigate(['/edit-produit', product.id]);
   }
 
   getImageUrl(productName: string): string {
